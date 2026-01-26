@@ -43,7 +43,12 @@ jobs:
             type=raw,value=latest
             type=sha,format=long
 
-      # 设置 QEMU 和 Buildx (用于构建)
+# ... 前面的步骤保持不变 ...
+
+      # 确保 QEMU 设置步骤存在 (这对 ARM 构建至关重要)
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -52,8 +57,11 @@ jobs:
         with:
           context: .
           push: true
-          # 使用上面 meta 步骤生成的标签 (包含 latest 和 git commit sha)
+          # 关键修改：同时构建 amd64 (普通PC) 和 arm64 (你的服务器)
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # 必须传递 build-args 才能让 Dockerfile 里的 ARG 生效吗？
+          # 其实 Buildx 会自动注入 TARGETARCH，但显式声明也没坏处
