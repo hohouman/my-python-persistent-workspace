@@ -1,0 +1,59 @@
+name: Build and Push to GitHub Packages
+
+on:
+  push:
+    branches:
+      - "main"
+    # 也可以手动触发构建
+    workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  # 自动获取当前仓库名称 (格式: 用户名/仓库名)
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    # !重要!：赋予 GITHUB_TOKEN 写入包的权限
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 登录到 GitHub Container Registry
+      # 使用系统自动生成的 GITHUB_TOKEN，无需你去设置 Secrets
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 自动处理 Docker 标签和元数据 (会自动将仓库名转换为小写，防止构建报错)
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=long
+
+      # 设置 QEMU 和 Buildx (用于构建)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # 使用上面 meta 步骤生成的标签 (包含 latest 和 git commit sha)
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
