@@ -43,8 +43,6 @@ jobs:
             type=raw,value=latest
             type=sha,format=long
 
-# ... 前面的步骤保持不变 ...
-
       # 确保 QEMU 设置步骤存在 (这对 ARM 构建至关重要)
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
