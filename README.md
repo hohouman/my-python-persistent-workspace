@@ -20,7 +20,7 @@ Run the container directly from GitHub Container Registry:
 
 ```bash
 docker run -d \
-  --name my-workspace \
+  --name python-workspace \
   --restart unless-stopped \
   -p 8080:7681 \
   -e WEB_USER="admin" \
