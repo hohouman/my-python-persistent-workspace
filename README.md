@@ -22,8 +22,8 @@ Run the container directly from GitHub Container Registry:
 docker run -d \
   --name python-workspace \
   --restart unless-stopped \
-  -p 8080:7681 \
-  -e WEB_USER="admin" \
-  -e WEB_PASSWORD="password" \
+  -p 7681:7681 \
+  -e WEB_USER=admin \
+  -e WEB_PASSWORD=password \
   -v $(pwd)/my_scripts:/app \
   ghcr.io/hohouman/my-python-persistent-workspace:latest
