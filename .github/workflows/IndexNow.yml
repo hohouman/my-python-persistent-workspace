@@ -14,5 +14,5 @@ jobs:
         with:
           sitemap-location: 'https://leidun.pp.ua/sitemap.xml'
           key: ${{ secrets.INDEXNOW_KEY }}
-          since: 3
-          since-unit: 'year'
+          since: 2
+          since-unit: 'day'
